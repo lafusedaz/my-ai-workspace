@@ -6,14 +6,14 @@ st.markdown("<style>#MainMenu, footer, header {visibility: hidden;}</style>", un
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
+    import base64
     api_key = st.secrets.get("gemini_api_key", "")
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ใช้วิธีต่อคำเพื่อหนีระบบตัดคำลิงก์
-    part1 = "https://generativelanguage."
-    part2 = "://googleapis.com"
-    part3 = "gemini-1.5-flash:generateContent"
-    url = part1 + part2 + part3 + f"?key={str(api_key).strip()}"
+    # ถอดรหัสลิงก์มาตรฐานจริงของ Google เพื่อหนีปัญหาคำขาดในระบบแชต
+    encoded_url = "aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjEvbW9kZWxzL2dlbWluaS0xLjUtZmxhc2g6Z2VuZXJhdGVDb250ZW50"
+    target_url = base64.b64decode(encoded_url).decode("utf-8")
+    url = f"{target_url}?key={str(api_key).strip()}"
     
     headers = {'Content-Type': 'application/json'}
     payload = {
@@ -27,6 +27,7 @@ def call_gemini(prompt_text, system_instruction):
         else:
             return f"❌ API Error Code {res.status_code}: {res.text}"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
