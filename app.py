@@ -10,9 +10,7 @@ def call_gemini(prompt_text, system_instruction):
     if not or_key: return "⚠️ กรุณาตั้งค่า openrouter_api_key ในระบบ Secrets ก่อนครับ"
     
     url = "https://openrouter.ai" + "/api/v1/chat/completions"
-
     headers = {
-
         "Authorization": f"Bearer {or_key}",
         "Content-Type": "application/json"
     }
@@ -25,11 +23,11 @@ def call_gemini(prompt_text, system_instruction):
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
-            res_json = res.json()
-            return res_json['choices'][0]['message']['content']
+            return res.json()['choices'][0]['message']['content']
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 
 if "users_db" not in st.session_state:
