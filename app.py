@@ -9,8 +9,10 @@ def call_gemini(prompt_text, system_instruction):
     or_key = st.secrets.get("openrouter_api_key", "")
     if not or_key: return "⚠️ กรุณาตั้งค่า openrouter_api_key ในระบบ Secrets ก่อนครับ"
     
-    url = "https://openrouter.ai"
+    url = "https://openrouter.ai" + "/api/v1/chat/completions"
+
     headers = {
+
         "Authorization": f"Bearer {or_key}",
         "Content-Type": "application/json"
     }
