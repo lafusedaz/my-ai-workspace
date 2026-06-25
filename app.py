@@ -9,19 +9,21 @@ def call_gemini(prompt_text, system_instruction):
     api_key = st.secrets.get("gemini_api_key", "")
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ล้างช่องว่างและทำความสะอาดตัวคีย์ป้องกันระบบแปลงค่า URL ผิดพลาด
-    clean_key = str(api_key).strip()
+    # ส่ง API Key ผ่าน Header ปลอดภัยที่สุด ตัดปัญหาลิงก์ชนกัน 100%   
     url = "https://googleapis.com"
-    
+    headers = {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': str(api_key).strip()
+    }
     payload = {
         "contents": [{"parts": [{"text": prompt_text}]}], 
         "systemInstruction": {"parts": [{"text": system_instruction}]}
     }
-    # ส่งคีย์ผ่าน Params แยกต่างหากเพื่อตัดปัญหาเรื่องการพิมพ์ URL ชนกันเด็ดขาด
     try:
-        res = requests.post(url, params={"key": clean_key}, headers={'Content-Type': 'application/json'}, data=json.dumps(payload))
+        res = requests.post(url, headers=headers, data=json.dumps(payload))
         return res.json()['candidates']['content']['parts']['text'] if res.status_code == 200 else f"❌ API Error: {res.text}"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
