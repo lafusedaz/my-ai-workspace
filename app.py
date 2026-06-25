@@ -111,8 +111,12 @@ else:
             with st.expander("➕ เพิ่มบอดี้พาร์ทใหม่เข้าสต๊оค"):
                 p_id, p_name, p_oem = st.text_input("รหัสสินค้า:"), st.text_input("ชื่อสินค้า:"), st.text_input("รหัส OEM:")
                 p_p, p_s = st.number_input("ราคาปลีก:", min_value=0), st.number_input("สต๊оค:", min_value=0)
+                p_img = st.file_uploader("แนบรูปภาพสินค้า:", type=["png","jpg","jpeg"])
+
                 if st.button("บันทึกสินค้า") and p_id and p_name:
-                    st.session_state.inventory.append({"id": p_id, "name": p_name, "oem": p_oem, "price": p_p, "stock": p_s, "img": "https://placeholder.com"}); st.rerun()
+                st.session_state.inventory.append({"id": p_id, "name": p_name, "oem": p_oem, "price": p_p, "stock": p_s, "img": p_img if p_img else "https://placeholder.com"}); st.rerun()
+
+
         for item in inv:
             with st.container(border=True):
                 im, inf, act = st.columns([1, 4, 1.5])
