@@ -21,13 +21,15 @@ def call_gemini(prompt_text, system_instruction):
             {"role": "user", "content": f"สวมบทบาท: {system_instruction}\nคำถาม: {prompt_text}"}
         ]
     }
-    try:
+       try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
-            return res.json()['choices'][0]['message']['content']
+            data = res.json()
+            return data['choices'][0]['message']['content']
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 
 
