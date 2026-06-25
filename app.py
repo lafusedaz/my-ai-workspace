@@ -170,60 +170,62 @@ else:
                 if role == "Manager" and act.button("❌ ลบพาร์ท", key=f"del_{item['id']}", use_container_width=True):
                     st.session_state.inventory = [i for i in st.session_state.inventory if i["id"] != item["id"]]; st.rerun()
 
-       # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager) ---
-    elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
-        st.subheader("💬 ห้องปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
+      # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager) ---
+    elif menu == "💬 แชตกลุ่ม 5 ที่ปรึกษา AI" and role == "Manager":
+        st.subheader("💬 ห้องประชุมปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
         
-        # ดึงรายชื่อ AI Bot ทั้งหมดที่มีในระบบปัจจุบัน
+        # ดึงรายชื่อ AI Bot ทั้งหมด
         ai_bots = [u for u in st.session_state.users_db if u["role"] == "AI Bot"]
         ai_names = [bot["username"] for bot in ai_bots]
         
-        # สร้างแถบด้านบนหรือขวาด้านในหน้าแชต เพื่อให้เลือกผู้เชี่ยวชาญ (ในที่นี้ใช้สไตล์ Pills สวยงามและเลือกง่าย)
-        selected_bot_name = st.radio(
-            "เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", 
-            options=ai_names, 
-            horizontal=True,
-            help="คลิกเลือกเปลี่ยนตัวละคร AI เพื่อดูประวัติการคุยและส่งคำถามแยกกันได้ทันที"
-        )
-        
-        # ค้นหา Object ของบอทตัวที่ถูกเลือกเพื่อดึงรายละเอียดคำอธิบาย (desc) และสัญลักษณ์ (avatar)
+        # แยกแถบเครื่องมือ: ฝั่งซ้ายเลือก AI ฝั่งขวาปุ่มล้างประวัติแชตป้องกันระบบค้าง
+        col_menu_ai, col_clear_btn = st.columns([4, 1.2])
+        with col_menu_ai:
+            selected_bot_name = st.radio(
+                "เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", 
+                options=ai_names, 
+                horizontal=True
+            )
+        with col_clear_btn:
+            if st.button("♻️ ล้างประวัติแชตทั้งหมด", use_container_width=True, help="คลิกเพื่อรีเซ็ตข้อมูลกรณีช่องแชตไม่แสดงผล"):
+                st.session_state.chat_history = []
+                st.rerun()
+                
         active_bot = next((b for b in ai_bots if b["username"] == selected_bot_name), None)
         
         if active_bot:
             st.info(f"{active_bot['avatar']} **{active_bot['username']}**: {active_bot['desc']}")
             st.divider()
             
-            # กรองประวัติการแชต: แสดงเฉพาะข้อความของผู้ใช้ (Manager) และ AI Bot ตัวที่กำลังเลือกอยู่เท่านั้น
+            # ดึงประวัติเฉพาะที่คุยกับ AI ตัวที่เลือก หรือข้อความที่ระบุคู่สนทนาถูกต้อง
             filtered_history = [
                 m for m in st.session_state.chat_history 
-                if m["speaker"] == "Manager" or m["speaker"] == selected_bot_name
+                if m.get("speaker") == "Manager" or m.get("speaker") == selected_bot_name
             ]
             
-            # แสดงประวัติการแชตที่กรองแล้ว
+            # วนลูปแสดงข้อความแชต
             for m in filtered_history:
-                # ตรวจสอบบทบาทเพื่อเลือกฝั่งการแสดงผลไอคอนข้อความ
-                chat_role = "user" if m["speaker"] == "Manager" else "assistant"
+                chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
                 with st.chat_message(chat_role): 
-                    st.write(f"**{m['speaker']}:** {m['text']}")
-                    
-            # ช่องรับข้อความพิมพ์คุยกับ AI ปัจจุบัน
+                    st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
+            
+            # ส่วนสำคัญ: กล่องพิมพ์แชต (จะแสดงผลต่อเมื่อไม่มีอะไรบล็อกการรันโค้ดด้านบน)
             user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {selected_bot_name} ที่นี่...")
             
             if user_msg:
-                # 1. บันทึกคำถามของ Manager ลงประวัติหลัก
+                # บันทึกคำถามของ Manager
                 st.session_state.chat_history.append({"role": "user", "speaker": "Manager", "text": user_msg})
                 
-                # กำหนดคำสั่งควบคุมระบบ (System Instruction)
+                # กำหนด Prompt สำหรับ AI ปัจจุบัน
                 base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
                 system_prompt = f"{base} จงสวมบทบาทเป็น {active_bot['username']} และเน้นตอบในส่วนงาน: {active_bot['desc']}"
                 
-                # 2. เรียกใช้งาน API เจมินี่เพียงตัวเดียวที่เลือกคุย (หน้าเว็บจะตอบสนองไวขึ้น 3 เท่าตัว!)
-                with st.spinner(f"🔮 {selected_bot_name} กำลังวิเคราะห์ข้อมูลซ่อมและวางแผน..."):
+                # เรียก API เฉพาะบอทที่เลือกคุย
+                with st.spinner(f"🔮 {selected_bot_name} กำลังวิเคราะห์แผนงาน..."):
                     ai_reply = call_gemini(user_msg, system_prompt)
-                    # บันทึกคำตอบกลับของบอทลงประวัติหลัก
                     st.session_state.chat_history.append({"role": "assistant", "speaker": selected_bot_name, "text": ai_reply})
                 
-                # 3. บันทึกประวัติแผนงานอัตโนมัติลงในกระดาน Tasks
+                # บันทึกลงระบบงานซ่อมหลัก
                 st.session_state.tasks.append({
                     "id": len(st.session_state.tasks) + 1, 
                     "target": f"🎯 แผนงานจาก {selected_bot_name}", 
@@ -235,3 +237,4 @@ else:
                     "timeline": []
                 })
                 st.rerun()
+
