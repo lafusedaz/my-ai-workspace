@@ -16,9 +16,10 @@ def call_gemini(prompt_text, system_instruction):
     url = f"{target_url}?key={str(api_key).strip()}"
     
     headers = {'Content-Type': 'application/json'}
-    payload = {
-        "contents": [{"parts": [{"text": prompt_text}]}],
-        "systemInstruction": {"parts": [{"text": system_instruction}]}
+       payload = {
+        "contents": [
+            {"role": "user", "parts": [{"text": f"คำสั่งระบบ: {system_instruction}\n\nคำถามจากผู้ใช้: {prompt_text}"}]}
+        ]
     }
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
