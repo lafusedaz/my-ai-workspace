@@ -108,9 +108,9 @@ else:
         q = st.text_input("🔍 ค้นหาตามชื่อสินค้าบางส่วน หรือ รหัสสินค้า:")
         inv = [i for i in st.session_state.inventory if q.lower() in i["name"].lower() or q.lower() in i["id"].lower()] if q else st.session_state.inventory
         if role == "Manager":
-            with st.expander("➕ เพิ่มบอดี้พาร์ทใหม่เข้าสต๊оค"):
+            with st.expander("➕ เพิ่มบอดี้พาร์ทใหม่เข้าสต๊อค"):
                 p_id, p_name, p_oem = st.text_input("รหัสสินค้า:"), st.text_input("ชื่อสินค้า:"), st.text_input("รหัส OEM:")
-                p_p, p_s = st.number_input("ราคาปลีก:", min_value=0), st.number_input("สต๊оค:", min_value=0)
+                p_p, p_s = st.number_input("ราคาปลีก:", min_value=0), st.number_input("สต๊อค:", min_value=0)
                 p_img = st.file_uploader("แนบรูปภาพสินค้า:", type=["png","jpg","jpeg"])
 
                 if st.button("บันทึกสินค้า") and p_id and p_name:
