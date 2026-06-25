@@ -92,7 +92,9 @@ if cookie_user and cookie_role and "user_role" not in st.session_state:
     st.session_state.user_role = cookie_role
     st.session_state.username = cookie_user
 
-
+# ==============================================================================
+# หน้าจอเข้าสู่ระบบ (จะทำงานและโชว์เฉพาะเมื่อยังไม่ได้ล็อกอินเท่านั้น)
+# ==============================================================================
 if "user_role" not in st.session_state:
     st.title("⚙️ Tripple Nine Garage System")
     un = st.text_input("Username:")
@@ -104,16 +106,18 @@ if "user_role" not in st.session_state:
             st.session_state.user_role = user["role"]
             st.session_state.username = user["username"]
             
+            # บันทึกสถานะฝากลงบราวเซอร์ 5 นาที (300 วินาที)
             expire_time = datetime.datetime.now() + datetime.timedelta(seconds=300)
             controller.set("saved_username", user["username"], expires=expire_time)
             controller.set("saved_role", user["role"], expires=expire_time)
+            
+            # ใช้สเปซบาร์ด้านหน้าคำสั่งเหล่านี้ 12 ช่อง (หรือกด 3 Tab)
             st.success("🔓 ยินดีต้อนรับเข้าสู่ระบบ!")
             st.rerun()
-        else:
+        else: 
             st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
             
-    st.stop()
-
+    # ตัดคำว่า st.stop() ออกไปเลย ไม่ต้องใส่แล้วครับ!
 
 role, current_user = st.session_state.user_role, st.session_state.username
 my_user_data = next((u for u in st.session_state.users_db if u["username"] == current_user), None)
