@@ -10,17 +10,16 @@ def call_gemini(prompt_text, system_instruction):
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
     # ส่ง API Key ผ่าน Header ปลอดภัยที่สุด ตัดปัญหาลิงก์ชนกัน 100%   
-    base_url = "https://generativelanguage.googleapis.com"
-    endpoint = "/v1beta/models/gemini-2.5-flash:generateContent"
+    base_url = "https://googleapis.com"
+    endpoint = f"/v1beta/models/gemini-2.5-flash:generateContent?key={str(api_key).strip()}"
     url = base_url + endpoint
-
-    headers = {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': str(api_key).strip()
-    }
+    
+    headers = {'Content-Type': 'application/json'}
     payload = {
         "contents": [{"parts": [{"text": prompt_text}]}], 
         "systemInstruction": {"parts": [{"text": system_instruction}]}
+    }
+
     }
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
