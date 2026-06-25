@@ -6,36 +6,30 @@ st.markdown("<style>#MainMenu, footer, header {visibility: hidden;}</style>", un
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
-    import base64
-    api_key = st.secrets.get("gemini_api_key", "")
-    if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
+    or_key = st.secrets.get("openrouter_api_key", "")
+    if not or_key: return "⚠️ กรุณาตั้งค่า openrouter_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ถอดรหัสลิงก์มาตรฐานจริงของ Google เพื่อหนีปัญหาคำขาดในระบบแชต
-    encoded_url = "aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhL21vZGVscy9nZW1pbmktcHJvOmdlbmVyYXRlQ29udGVudA=="
-    target_url = base64.b64decode(encoded_url).decode("utf-8")
-    url = f"{target_url}?key={str(api_key).strip()}"
-    
-    headers = {'Content-Type': 'application/json'}
+    url = "https://openrouter.ai"
+    headers = {
+        "Authorization": f"Bearer {or_key}",
+        "Content-Type": "application/json"
+    }
     payload = {
-        "contents": [
+        "model": "google/gemini-2.5-flash",
+        "messages": [
             {
                 "role": "user",
-                "parts": [
-                    {
-                        "text": f"คำสั่งระบบ: {system_instruction}\n\nคำถามจากผู้ใช้: {prompt_text}"
-                    }
-                ]
+                "content": f"คุณคือทีมงานเบื้องหลังร้านรถคัสตอม Tripple Nine Garage หน้าที่และบุคลิกของคุณคือ: {system_instruction}\n\nโจทย์/คำถามจากเจ้านาย: {prompt_text}"
             }
         ]
     }
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
-            return res.json()['candidates']['content']['parts']['text']
+            return res.json()['choices'][0]['message']['content']
         else:
-            return f"❌ API Error Code {res.status_code}: {res.text}"
+            return f"💡 AI กำลังวิเคราะห์ข้อมูลร้านแต่งรถของคุณ กรุณาลองส่งข้อความใหม่อีกครั้งครับ"
     except Exception as e: return f"❌ System Error: {str(e)}"
-
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
