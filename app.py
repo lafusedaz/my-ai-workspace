@@ -13,19 +13,26 @@ st.set_page_config(
 )
 
 # 🛠️ 2. ปรับ CSS ดึงแถบข้างขึ้นมาแสดงผลถาวร และลบปุ่มควบคุมการปิดหน้าต่างทิ้งไป
+# ซ่อนส่วนหัว เมนู เครดิต และล็อกให้ Sidebar กางออกถาวร (ซ่อนปุ่มลูกศร/กากบาท)
 st.markdown(
     """
     <style>
+    /* ซ่อนเมนูหลัก หัวข้อ และฟุตเตอร์เดิม */
     #MainMenu, footer, header {visibility: hidden;}
-    [data-testid="collapsedControl"] {display: none !important;}
-    [data-testid="stSidebar"][aria-expanded="false"] {display: block !important; width: 21rem !important;}
+    
+    /* ซ่อนปุ่มกากบาท (X) ด้านในพอร์ตเมื่อ Sidebar กางออก */
+    [data-testid="stSidebarCollapseButton"] {
+        display: none;
+    }
+    
+    /* ซ่อนปุ่มลูกศร (>) ด้านนอกที่ใช้กางแผงควบคุมเมื่อเผลอพับ */
+    [data-testid="collapsedControl"] {
+        display: none;
+    }
     </style>
     """, 
     unsafe_allow_html=True
 )
-
-
-
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
