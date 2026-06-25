@@ -114,7 +114,7 @@ else:
                 p_img = st.file_uploader("แนบรูปภาพสินค้า:", type=["png","jpg","jpeg"])
 
                 if st.button("บันทึกสินค้า") and p_id and p_name:
-                st.session_state.inventory.append({"id": p_id, "name": p_name, "oem": p_oem, "price": p_p, "stock": p_s, "img": p_img if p_img else "https://placeholder.com"}); st.rerun()
+                                                       st.session_state.inventory.append({"id": p_id, "name": p_name, "oem": p_oem, "price": p_p, "stock": p_s, "img": p_img if p_img else "https://placeholder.com"}); st.rerun()
 
 
         for item in inv:
