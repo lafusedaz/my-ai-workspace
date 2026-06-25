@@ -11,7 +11,7 @@ def call_gemini(prompt_text, system_instruction):
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
     # ถอดรหัสลิงก์มาตรฐานจริงของ Google เพื่อหนีปัญหาคำขาดในระบบแชต
-    encoded_url = "aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjEvbW9kZWxzL2dlbWluaS0xLjUtZmxhc2g6Z2VuZXJhdGVDb250ZW50"
+    encoded_url = "aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhL21vZGVscy9nZW1pbmktMS41LWZsYXNoOmdlbmVyYXRlQ29udGVudA=="
     target_url = base64.b64decode(encoded_url).decode("utf-8")
     url = f"{target_url}?key={str(api_key).strip()}"
     
