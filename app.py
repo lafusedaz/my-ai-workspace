@@ -14,6 +14,8 @@ def call_gemini(prompt_text, system_instruction):
         return res.json()['candidates']['content']['parts']['text'] if res.status_code == 200 else f"❌ Error: {res.text}"
     except Exception as e: return f"❌ Error: {str(e)}"
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
         {"username": "manager", "password": "mgr999", "role": "Manager", "created_at": "2026-01-01 09:00"},
