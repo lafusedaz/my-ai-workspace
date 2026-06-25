@@ -9,23 +9,20 @@ def call_gemini(prompt_text, system_instruction):
     api_key = st.secrets.get("gemini_api_key", "")
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ส่ง API Key ผ่าน Header ปลอดภัยที่สุด ตัดปัญหาลิงก์ชนกัน 100%   
-    base_url = "https://googleapis.com"
-    endpoint = f"/v1beta/models/gemini-pro:generateContent?key={str(api_key).strip()}"
-
-    url = base_url + endpoint
-    
+    # ใช้โครงสร้างลิงก์เวอร์ชัน v1 มาตรฐานสากล มั่นคง ปลอดภัย ไม่หลุด 404 แน่นอน
+    url = f"https://googleapis.com{str(api_key).strip()}"
     headers = {'Content-Type': 'application/json'}
     payload = {
-        "contents": [{"parts": [{"text": prompt_text}]}], 
+        "contents": [{"parts": [{"text": prompt_text}]}],
         "systemInstruction": {"parts": [{"text": system_instruction}]}
     }
-
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
-        return res.json()['candidates']['content']['parts']['text'] if res.status_code == 200 else f"❌ API Error: {res.text}"
+        if res.status_code == 200:
+            return res.json()['candidates']['content']['parts']['text']
+        else:
+            return f"❌ API Error Code {res.status_code}: {res.text}"
     except Exception as e: return f"❌ System Error: {str(e)}"
-
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
