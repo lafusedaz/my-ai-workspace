@@ -145,6 +145,12 @@ else:
                             for t in st.session_state.tasks:
                                 if t["id"] == task["id"]: t["status"], t["notes"], t["update_time"] = "ปิด Job", f"ปิดโดย {current_user}: {reason}", datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                             st.rerun()
+                                                # ปุ่มลบงานถาวร โชว์เฉพาะ Manager เท่านั้น
+                    if role == "Manager":
+                        if c3.button("🗑️ ลบงานถาวร", key=f"del_task_{task['id']}", use_container_width=True, type="primary"):
+                            st.session_state.tasks = [t for t in st.session_state.tasks if t["id"] != task["id"]]
+                            st.rerun()
+
 
     elif menu in ["📦 สินค้าหลังร้าน", "📦 จัดการคลังสินค้า"]:
         st.subheader("📦 คลังบอดี้พาร์ทและอะไหล่หลังร้าน")
