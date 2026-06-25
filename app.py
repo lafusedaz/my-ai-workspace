@@ -128,16 +128,16 @@ with col_hr:
             controller.remove("saved_role")
         st.rerun()
 
-    st.divider()
+st.divider()
 
-    st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
-    if my_user_data and my_user_data.get("avatar"): 
+st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
+if my_user_data and my_user_data.get("avatar"): 
         st.sidebar.image(my_user_data["avatar"], width=70)
-    else: 
+else: 
         st.sidebar.write("👤 *ยังไม่มีรูปโปรไฟล์*")
     
     # สร้างตัวแปรช่วยนับเพื่อนำไปเปลี่ยนคีย์ (ใช้ล้างกล่องอัปโหลดหลังบันทึก)
-    if "avatar_version" not in st.session_state:
+if "avatar_version" not in st.session_state:
         st.session_state.avatar_version = 0
         
     uploaded_avatar = st.sidebar.file_uploader(
