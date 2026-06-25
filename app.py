@@ -4,14 +4,22 @@ import datetime, requests, json
 st.set_page_config(layout="wide", page_title="Tripple Nine Garage", page_icon="⚙️")
 st.markdown("<style>#MainMenu, footer, header {visibility: hidden;}</style>", unsafe_allow_html=True)
 
-# ฟังก์ชันเรียกใช้ Gemini API เวอร์ชันแก้บั๊กที่อยู่ URL เรียบร้อย
+# ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
     api_key = st.secrets.get("gemini_api_key", "")
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
-    url = f"https://googleapis.com{api_key}"
-    payload = {"contents": [{"parts": [{"text": prompt_text}]}], "systemInstruction": {"parts": [{"text": system_instruction}]}}
+    
+    # ล้างช่องว่างและทำความสะอาดตัวคีย์ป้องกันระบบแปลงค่า URL ผิดพลาด
+    clean_key = str(api_key).strip()
+    url = "https://googleapis.com"
+    
+    payload = {
+        "contents": [{"parts": [{"text": prompt_text}]}], 
+        "systemInstruction": {"parts": [{"text": system_instruction}]}
+    }
+    # ส่งคีย์ผ่าน Params แยกต่างหากเพื่อตัดปัญหาเรื่องการพิมพ์ URL ชนกันเด็ดขาด
     try:
-        res = requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(payload))
+        res = requests.post(url, params={"key": clean_key}, headers={'Content-Type': 'application/json'}, data=json.dumps(payload))
         return res.json()['candidates']['content']['parts']['text'] if res.status_code == 200 else f"❌ API Error: {res.text}"
     except Exception as e: return f"❌ System Error: {str(e)}"
 
@@ -96,7 +104,7 @@ else:
                 c1, c2, c3 = st.columns([2.2, 3, 1.5])
                 with c1:
                     u_data = next((usr for usr in st.session_state.users_db if usr["username"] == task["user"]), None)
-                    cav1, cav2 = st.columns([1, 4])
+                    cav1, cav2 = st.columns()
                     if u_data and u_data.get("avatar"): cav1.image(u_data["avatar"], width=45)
                     else: cav1.markdown("### 👤")
                     with cav2:
