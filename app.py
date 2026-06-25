@@ -99,7 +99,7 @@ else:
         if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True): del st.session_state.user_role, st.session_state.username; st.rerun()
     st.divider()
 
-        st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
+    st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
     if my_user_data and my_user_data.get("avatar"): 
         st.sidebar.image(my_user_data["avatar"], width=70)
     else: 
@@ -126,6 +126,7 @@ else:
                 st.rerun()
             else:
                 st.sidebar.error("ไม่สามารถประมวลผลรูปภาพได้")
+
 
         
     st.sidebar.divider()
