@@ -1,22 +1,29 @@
 import streamlit as st
 import datetime, requests, json
 
+# 🛠️ 1. บังคับเปิดแถบข้างและผูกสถานะใน Session State (แก้ปัญหาปุ่มลูกศรไม่ขึ้น)
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "expanded"
+
 st.set_page_config(
     layout="wide", 
     page_title="Tripple Nine Garage", 
     page_icon="⚙️",
-    initial_sidebar_state="expanded" # สั่งให้กางออก
+    initial_sidebar_state=st.session_state.sidebar_state
 )
 
-# ลบคำสั่งซ่อนปุ่มออกชั่วคราว เพื่อให้เบราว์เซอร์ยอมคืนปุ่มลูกศรกลับมา
+# 🛠️ 2. ปรับ CSS ดึงแถบข้างขึ้นมาแสดงผลถาวร และลบปุ่มควบคุมการปิดหน้าต่างทิ้งไป
 st.markdown(
     """
     <style>
     #MainMenu, footer, header {visibility: hidden;}
+    [data-testid="collapsedControl"] {display: none !important;}
+    [data-testid="stSidebar"][aria-expanded="false"] {display: block !important; width: 21rem !important;}
     </style>
     """, 
     unsafe_allow_html=True
 )
+
 
 
 
