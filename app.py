@@ -91,7 +91,6 @@ cookie_role = controller.get("saved_role")
 if cookie_user and cookie_role and "user_role" not in st.session_state:
     st.session_state.user_role = cookie_role
     st.session_state.username = cookie_user
-    st.rerun()  # 🌟 บรรทัดนี้สำคัญมาก! ต้องเพิ่มเข้ามา โดยเคาะเว้นวรรคด้านหน้า 4 ช่องให้ตรงกับคำว่า st.session_state ด้านบนครับ
 
 
 if "user_role" not in st.session_state:
