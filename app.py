@@ -6,11 +6,14 @@ st.markdown("<style>#MainMenu, footer, header {visibility: hidden;}</style>", un
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
+    import base64
     or_key = st.secrets.get("openrouter_api_key", "")
     if not or_key: return "⚠️ กรุณาตั้งค่า openrouter_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ใช้โครงสร้างฐานข้อมูลสากลยิงตรงผ่าน API ของท่อหลักโดยไม่ผ่านการบวกคำศัพท์
-    url = "https://openrouter.ai"
+    # ถอดรหัสลิงก์ท่อตรง OpenRouter เต็มรูปแบบ ป้องกันปัญหาเครื่องหมายบวกหรือข้อความขาด 100%
+    encoded_url = "aHR0cHM6Ly9vcGVucm91dGVyLmFpL2FwaS92MS9jaGF0L2NvbXBsZXRpb25z"
+    url = base64.b64decode(encoded_url).decode("utf-8")
+    
     headers = {
         "Authorization": f"Bearer {or_key}",
         "Content-Type": "application/json"
@@ -29,10 +32,6 @@ def call_gemini(prompt_text, system_instruction):
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
-
-
-
-
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
