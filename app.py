@@ -99,11 +99,34 @@ else:
         if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True): del st.session_state.user_role, st.session_state.username; st.rerun()
     st.divider()
 
-    st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
-    if my_user_data and my_user_data.get("avatar"): st.sidebar.image(my_user_data["avatar"], width=70)
-    else: st.sidebar.write("👤 *ยังไม่มีรูปโปรไฟล์*")
-    uploaded_avatar = st.sidebar.file_uploader("เปลี่ยนรูป Avatar ของคุณ:", type=["png","jpg","jpeg"], key="my_av_up")
-    if uploaded_avatar and my_user_data: my_user_data["avatar"] = uploaded_avatar; st.sidebar.success("อัปเดตรูปสำเร็จ!"); st.rerun()
+        st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
+    if my_user_data and my_user_data.get("avatar"): 
+        st.sidebar.image(my_user_data["avatar"], width=70)
+    else: 
+        st.sidebar.write("👤 *ยังไม่มีรูปโปรไฟล์*")
+    
+    # สร้างตัวแปรช่วยนับเพื่อนำไปเปลี่ยนคีย์ (ใช้ล้างกล่องอัปโหลดหลังบันทึก)
+    if "avatar_version" not in st.session_state:
+        st.session_state.avatar_version = 0
+        
+    uploaded_avatar = st.sidebar.file_uploader(
+        "เปลี่ยนรูป Avatar ของคุณ:", 
+        type=["png","jpg","jpeg"], 
+        key=f"my_av_up_{st.session_state.avatar_version}"
+    )
+    
+    # ใช้ปุ่มกดยืนยันเพื่อล็อกไม่ให้เกิดลูป Rerun ค้าง และแปลงไฟล์รูปภาพ
+    if uploaded_avatar and my_user_data:
+        if st.sidebar.button("💾 ยืนยันเปลี่ยนรูปโปรไฟล์", use_container_width=True, type="primary"):
+            img_base64 = convert_image_to_base64(uploaded_avatar)
+            if img_base64:
+                my_user_data["avatar"] = img_base64
+                st.session_state.avatar_version += 1  # สลับคีย์เพื่อล้างค่ารูปค้าง
+                st.sidebar.success("อัปเดตรูปสำเร็จ!")
+                st.rerun()
+            else:
+                st.sidebar.error("ไม่สามารถประมวลผลรูปภาพได้")
+
         
     st.sidebar.divider()
     menu = st.sidebar.radio("เมนูการทำงาน", ["📋 หน้าจอติดตามงาน", "📦 สินค้าหลังร้าน"] if role == "Staff" else ["💬 แชตที่ปรึกษา AI", "📋 หน้าจอติดตามงาน", "📦 จัดการคลังสินค้า", "👥 จัดการระบบ USER"])
