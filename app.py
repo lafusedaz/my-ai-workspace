@@ -5,18 +5,19 @@ st.set_page_config(
     layout="wide", 
     page_title="Tripple Nine Garage", 
     page_icon="⚙️",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded" # สั่งให้กางออก
 )
 
+# ลบคำสั่งซ่อนปุ่มออกชั่วคราว เพื่อให้เบราว์เซอร์ยอมคืนปุ่มลูกศรกลับมา
 st.markdown(
     """
     <style>
     #MainMenu, footer, header {visibility: hidden;}
-    [data-testid="collapsedControl"] {display: none !important;}
     </style>
     """, 
     unsafe_allow_html=True
 )
+
 
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
