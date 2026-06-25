@@ -93,21 +93,28 @@ if cookie_user and cookie_role and "user_role" not in st.session_state:
     st.session_state.username = cookie_user
 
 if "user_role" not in st.session_state:
+   if "user_role" not in st.session_state:
     st.title("⚙️ Tripple Nine Garage System")
     un = st.text_input("Username:")
     pw = st.text_input("Password:", type="password")
+    
     if st.button("เข้าสู่ระบบ", use_container_width=True):
         user = next((u for u in st.session_state.users_db if u["username"] == un and u["password"] == pw), None)
         if user: 
-            st.session_state.user_role, st.session_state.username = user["role"], user["username"]
+            st.session_state.user_role = user["role"]
+            st.session_state.username = user["username"]
+            
             expire_time = datetime.datetime.now() + datetime.timedelta(seconds=300)
             controller.set("saved_username", user["username"], expires=expire_time)
             controller.set("saved_role", user["role"], expires=expire_time)
+            st.success("🔓 ยินดีต้อนรับเข้าสู่ระบบ!")
             st.rerun()
-        else: st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
+        else: 
+            st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
+            
+    # คำสั่งย้ายมาอยู่แนวเดียวกับ st.title เพื่อล็อกหน้าจอให้ถูกต้องเด็ดขาด
     st.stop()
 
-else:
     role, current_user = st.session_state.user_role, st.session_state.username
     my_user_data = next((u for u in st.session_state.users_db if u["username"] == current_user), None)
     
