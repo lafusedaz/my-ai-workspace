@@ -9,13 +9,14 @@ def call_gemini(prompt_text, system_instruction):
     or_key = st.secrets.get("openrouter_api_key", "")
     if not or_key: return "⚠️ กรุณาตั้งค่า openrouter_api_key ในระบบ Secrets ก่อนครับ"
     
-    url = "https://openrouter.ai" + "/api/v1/chat/completions"
+    # ใช้โครงสร้างฐานข้อมูลสากลยิงตรงผ่าน API ของท่อหลักโดยไม่ผ่านการบวกคำศัพท์
+    url = "https://openrouter.ai"
     headers = {
         "Authorization": f"Bearer {or_key}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "meta-llama/llama-3.1-8b-instruct:free",
+        "model": "openrouter/free",
         "messages": [
             {"role": "user", "content": f"สวมบทบาท: {system_instruction}\nคำถาม: {prompt_text}"}
         ]
@@ -23,10 +24,11 @@ def call_gemini(prompt_text, system_instruction):
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
-            return res.json()['choices']['message']['content']
+            return res.json()['choices'][0]['message']['content']
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 
 
