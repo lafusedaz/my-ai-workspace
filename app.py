@@ -16,7 +16,7 @@ def call_gemini(prompt_text, system_instruction):
     url = f"{target_url}?key={str(api_key).strip()}"
     
     headers = {'Content-Type': 'application/json'}
-        payload = {
+    payload = {
         "contents": [
             {
                 "role": "user",
