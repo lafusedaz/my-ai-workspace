@@ -37,11 +37,10 @@ if "users_db" not in st.session_state:
     st.session_state.users_db = [
         {"username": "manager", "password": "mgr999", "role": "Manager", "created_at": "2026-01-01 09:00", "avatar": None},
         {"username": "staff1", "password": "stf123", "role": "Staff", "created_at": "2026-01-02 10:30", "avatar": None},
-        {"username": "AI ผู้เชี่ยวชาญยานยนต์", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "⚙️", "desc": "เน้นเทคนิคช่าง โครงสร้างรถ และรหัสพาร์ทตรงรุ่น"},
-        {"username": "AI คอนเทนต์", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "📝", "desc": "เน้นไอเดียถ่ายคลิป TikTok/เพจ แนว Before&After"},
-        {"username": "AI การตลาด & โปรดักชัน", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "📣", "desc": "เน้นกลยุทธ์หาลูกค้าและจัดแคมเปญโปรโมชัน"},
-        {"username": "AI กราฟิกดีไซน์", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "🎨", "desc": "เน้นไอเดียทิศทางภาพ โทนสี ดุดันหรูหราเพื่อโฆษณา"},
-        {"username": "AI วิเคราะห์ตลาด", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "📊", "desc": "เน้นวิเคราะห์คู่แข่ง เทรนด์แต่งรถปี 2026 และพฤติกรรมลูกค้า"}
+        {"username": "ผู้เชี่ยวชาญด้านชิ้นส่วนรถยนต์", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "⚙️", "desc": "เน้นข้อมูลเทคนิคช่าง โครงสร้างรถยนต์คัสตอม และรหัสอะไหล่บอดี้พาร์ทตรงรุ่น"},
+        {"username": "ผู้เชี่ยวชาญด้านการตลาด", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "📣", "desc": "เน้นกลยุทธ์การหาลูกค้าเข้าอู่ จัดโปรโมชันแคมเปญ และวิเคราะห์คู่แข่งแต่งรถ"},
+        {"username": "ผู้เชี่ยวชาญด้านคอนเท้นต์ครีเอทีฟ", "password": "-", "role": "AI Bot", "created_at": "SYSTEM", "avatar": "📝", "desc": "เน้นไอเดียคิดสคริปต์ถ่ายคลิปสั้นลง TikTok/Reels แนวแปลงโฉมรถ Before & After ให้ดึงดูดใจ"}
+
     ]
 if "tasks" not in st.session_state:
     st.session_state.tasks = [{"id": 1, "target": "ญข-9999 (Sylphy)", "detail": "แปลงโฉมเป็น Sentra ตรงรุ่น + พ่นสีน้ำเงินรอบคัน 2K", "user": "staff1", "status": "กำลังทำ", "update_time": "2026-06-25 14:00", "notes": "", "timeline": []}]
