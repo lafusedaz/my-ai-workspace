@@ -204,13 +204,21 @@ else:
             ]
             
             # วนลูปแสดงข้อความแชต
+                        # วนลูปแสดงข้อความแชต (แทรกคำสั่งแสดงรูปภาพย้อนหลัง)
             for m in filtered_history:
                 chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
                 with st.chat_message(chat_role): 
                     st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
+                    # ➕ จุดแทรกที่ 1.1: ถ้าข้อความนั้นมีรูปภาพแนบมาด้วย ให้แสดงรูปภาพในกล่องแชต
+                    if m.get("img"):
+                        st.image(m["img"], width=250)
             
-            # ส่วนสำคัญ: กล่องพิมพ์แชต (จะแสดงผลต่อเมื่อไม่มีอะไรบล็อกการรันโค้ดด้านบน)
+            # ➕ จุดแทรกที่ 1.2: เพิ่มปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต (จะเปลี่ยนสลับไปตาม AI แต่ละตัว)
+            chat_img = st.file_uploader("📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", type=["png","jpg","jpeg"], key=f"img_up_{selected_bot_name}")
+            
+            # ช่องพิมพ์ข้อความแชตเดิมของคุณ
             user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {selected_bot_name} ที่นี่...")
+
             
             if user_msg:
                 # บันทึกคำถามของ Manager
