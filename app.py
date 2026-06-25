@@ -115,10 +115,10 @@ else:
     with col_hl: st.markdown(f"🏁 **Tripple Nine Garage** | ผู้ใช้งาน: `{current_user}` ({role})")
     with col_hr:
         if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True):
-        del st.session_state.user_role
-        del st.session_state.username
-        controller.remove("saved_username")
-        controller.remove("saved_role")
+            del st.session_state.user_role
+            del st.session_state.username
+            controller.remove("saved_username")
+            controller.remove("saved_role")
         st.rerun()
 
     st.divider()
