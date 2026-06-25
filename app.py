@@ -51,7 +51,7 @@ else:
         with cl:
             for u in st.session_state.users_db:
                 with st.container(border=True):
-                    c_u, c_r, c_b = st.columns()
+                    c_u, c_r, c_b = st.columns(3)
                     c_u.write(f"👤 **{u['username']}** ({u['created_at']})")
                     c_r.write(f"`{u['role']}`")
                     if u["username"] != "manager" and c_b.button("❌", key=f"d_{u['username']}"):
