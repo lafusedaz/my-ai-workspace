@@ -17,19 +17,18 @@ def call_gemini(prompt_text, system_instruction):
     payload = {
         "model": "google/gemini-2.5-flash",
         "messages": [
-            {
-                "role": "user",
-                "content": f"คุณคือทีมงานเบื้องหลังร้านรถคัสตอม Tripple Nine Garage หน้าที่และบุคลิกของคุณคือ: {system_instruction}\n\nโจทย์/คำถามจากเจ้านาย: {prompt_text}"
-            }
+            {"role": "user", "content": f"สวมบทบาท: {system_instruction}\nคำถาม: {prompt_text}"}
         ]
     }
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
-            return res.json()['choices'][0]['message']['content']
+            res_json = res.json()
+            return res_json['choices'][0]['message']['content']
         else:
-            return f"💡 AI กำลังวิเคราะห์ข้อมูลร้านแต่งรถของคุณ กรุณาลองส่งข้อความใหม่อีกครั้งครับ"
+            return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
+
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
