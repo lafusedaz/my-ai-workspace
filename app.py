@@ -183,7 +183,7 @@ if menu == "👥 จัดการระบบ USER" and role == "Manager":
             if st.button("บันทึกเพิ่มพนักงาน", use_container_width=True) and new_un and new_pw:
                 st.session_state.users_db.append({"username": new_un, "password": new_pw, "role": "Staff", "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "avatar": None}); st.rerun()
 
-    elif menu == "📋 หน้าจอติดตามงาน":
+elif menu == "📋 หน้าจอติดตามงาน":
         st.subheader("📋 ระบบติดตามตารางงาน")
         with st.expander("➕ เปิด Job งานใหม่ (กรอกข้อมูล 3 ช่อง)"):
             t_target = st.text_input("1. ชื่อลูกค้า/ทะเบียนรถ:")
@@ -236,7 +236,7 @@ if menu == "👥 จัดการระบบ USER" and role == "Manager":
                             st.rerun()
 
 
-    elif menu in ["📦 สินค้าหลังร้าน", "📦 จัดการคลังสินค้า"]:
+elif menu in ["📦 สินค้าหลังร้าน", "📦 จัดการคลังสินค้า"]:
         st.subheader("📦 คลังบอดี้พาร์ทและอะไหล่หลังร้าน")
         q = st.text_input("🔍 ค้นหาตามชื่อสินค้าบางส่วน หรือ รหัสสินค้า:")
         inv = [i for i in st.session_state.inventory if q.lower() in i["name"].lower() or q.lower() in i["id"].lower()] if q else st.session_state.inventory
