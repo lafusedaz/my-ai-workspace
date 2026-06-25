@@ -1,38 +1,40 @@
 import streamlit as st
-import datetime, requests, json
-
-# 🛠️ 1. บังคับเปิดแถบข้างและผูกสถานะใน Session State (แก้ปัญหาปุ่มลูกศรไม่ขึ้น)
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
+import datetime
+import requests
+import json
+import base64
 
 st.set_page_config(
     layout="wide", 
     page_title="Tripple Nine Garage", 
     page_icon="⚙️",
-    initial_sidebar_state=st.session_state.sidebar_state
+    initial_sidebar_state="expanded"
 )
 
-# 🛠️ 2. ปรับ CSS ดึงแถบข้างขึ้นมาแสดงผลถาวร และลบปุ่มควบคุมการปิดหน้าต่างทิ้งไป
-# ซ่อนส่วนหัว เมนู เครดิต และล็อกให้ Sidebar กางออกถาวร (ซ่อนปุ่มลูกศร/กากบาท)
+# === วางแทรกตรงนี้เลยครับ (ชิดซ้ายสุดของหน้าจอ) ===
+def convert_image_to_base64(uploaded_file):
+    if uploaded_file is not None:
+        try:
+            import base64
+            bytes_data = uploaded_file.getvalue()
+            base64_str = base64.b64encode(bytes_data).decode("utf-8")
+            return f"data:image/jpeg;base64,{base64_str}"
+        except Exception:
+            return None
+    return None
+
+# ซ่อนส่วนหัว เมนู เครดิต และล็อกให้ Sidebar กางออกถาวร
 st.markdown(
     """
     <style>
-    /* ซ่อนเมนูหลัก หัวข้อ และฟุตเตอร์เดิม */
     #MainMenu, footer, header {visibility: hidden;}
-    
-    /* ซ่อนปุ่มกากบาท (X) ด้านในพอร์ตเมื่อ Sidebar กางออก */
-    [data-testid="stSidebarCollapseButton"] {
-        display: none;
-    }
-    
-    /* ซ่อนปุ่มลูกศร (>) ด้านนอกที่ใช้กางแผงควบคุมเมื่อเผลอพับ */
-    [data-testid="collapsedControl"] {
-        display: none;
-    }
+    [data-testid="stSidebarCollapseButton"] { display: none; }
+    [data-testid="collapsedControl"] { display: none; }
     </style>
     """, 
     unsafe_allow_html=True
 )
+
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
@@ -62,17 +64,6 @@ def call_gemini(prompt_text, system_instruction):
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
-    
-    def convert_image_to_base64(uploaded_file):
-        if uploaded_file is not None:
-            try:
-                import base64
-                bytes_data = uploaded_file.getvalue()
-                base64_str = base64.b64encode(bytes_data).decode("utf-8")
-                return f"data:image/jpeg;base64,{base64_str}"
-            except Exception:
-                return None
-        return None
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
