@@ -9,8 +9,12 @@ def call_gemini(prompt_text, system_instruction):
     api_key = st.secrets.get("gemini_api_key", "")
     if not api_key: return "⚠️ กรุณาตั้งค่า gemini_api_key ในระบบ Secrets ก่อนครับ"
     
-    # ใช้โครงสร้างลิงก์เวอร์ชัน v1 มาตรฐานสากล มั่นคง ปลอดภัย ไม่หลุด 404 แน่นอน
-    url = f"https://googleapis.com{str(api_key).strip()}"
+    # ใช้วิธีต่อคำเพื่อหนีระบบตัดคำลิงก์
+    part1 = "https://generativelanguage."
+    part2 = "://googleapis.com"
+    part3 = "gemini-1.5-flash:generateContent"
+    url = part1 + part2 + part3 + f"?key={str(api_key).strip()}"
+    
     headers = {'Content-Type': 'application/json'}
     payload = {
         "contents": [{"parts": [{"text": prompt_text}]}],
