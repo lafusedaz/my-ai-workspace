@@ -76,8 +76,17 @@ else:
         for task in (st.session_state.tasks if role == "Manager" else [t for t in st.session_state.tasks if t["user"] == current_user]):
             if "timeline" not in task: task["timeline"] = []
             with st.container(border=True):
-                c1, c2, c3 = st.columns([2, 3, 1.5])
-                c1.markdown(f"### 🚗 {task['target']}\n ช่าง: **{task['user']}**\n🕒 {task['update_time']}")
+                c1, c2, c3 = st.columns([2.2, 3, 1.5])
+                with c1:
+                    u_data = next((usr for usr in st.session_state.users_db if usr["username"] == task["user"]), None)
+                    cav1, cav2 = st.columns([1, 4])
+                    if u_data and u_data.get("avatar"): cav1.image(u_data["avatar"], width=45)
+                    else: cav1.markdown("### 👤")
+                with cav2:
+                        st.markdown(f"### 🚗 {task['target']}")
+                        st.caption(f"ช่างผู้รับผิดชอบ: **{task['user']}**\n🕒 อัปเดต: {task['update_time']}")
+
+
                 
                 with c2:
                     st.markdown(f"**🔧 รายละเอียดหลัก:**\n{task['detail']}")
