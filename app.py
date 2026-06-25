@@ -76,7 +76,7 @@ else:
     if uploaded_avatar and my_user_data: my_user_data["avatar"] = uploaded_avatar; st.sidebar.success("อัปเดตรูปสำเร็จ!"); st.rerun()
         
     st.sidebar.divider()
-    menu = st.sidebar.radio("เมนูการทำงาน", ["📋 หน้าจอติดตามงาน", "📦 สินค้าหลังร้าน"] if role == "Staff" else ["💬 แชตกลุ่ม 5 ที่ปรึกษา AI", "📋 หน้าจอติดตามงาน", "📦 จัดการคลังสินค้า", "👥 จัดการระบบ USER"])
+    menu = st.sidebar.radio("เมนูการทำงาน", ["📋 หน้าจอติดตามงาน", "📦 สินค้าหลังร้าน"] if role == "Staff" else ["💬 แชตที่ปรึกษา AI", "📋 หน้าจอติดตามงาน", "📦 จัดการคลังสินค้า", "👥 จัดการระบบ USER"])
 
     if menu == "👥 จัดการระบบ USER" and role == "Manager":
         st.subheader("👥 ระบบบริหารจัดการพนักงานและ AI")
