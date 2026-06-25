@@ -17,7 +17,7 @@ def call_gemini(prompt_text, system_instruction):
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "meta-llama/llama-3-8b-instruct:free",
+        "model": "meta-llama/llama-3.1-8b-instruct:free",
         "messages": [
             {"role": "user", "content": f"สวมบทบาท: {system_instruction}\nคำถาม: {prompt_text}"}
         ]
