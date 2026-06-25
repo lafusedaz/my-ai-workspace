@@ -170,80 +170,85 @@ else:
                 if role == "Manager" and act.button("❌ ลบพาร์ท", key=f"del_{item['id']}", use_container_width=True):
                     st.session_state.inventory = [i for i in st.session_state.inventory if i["id"] != item["id"]]; st.rerun()
                     
-        # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager - เวอร์ชันแก้ไขบั๊กข้อความซ้ำ) ---
+
+       # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager - เวอร์ชันแก้ปัญหาหน้าจอว่าง) ---
     elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
-        st.subheader("💬 ห้องปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
+        st.subheader("💬 ห้องประชุมปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
         
         # ดึงรายชื่อ AI Bot ทั้งหมด
         ai_bots = [u for u in st.session_state.users_db if u["role"] == "AI Bot"]
         ai_names = [bot["username"] for bot in ai_bots]
         
-        # ส่วนควบคุมด้านบน: เลือก AI และ ปุ่มล้างประวัติ
-        col_menu_ai, col_clear_btn = st.columns([4, 1.2])
-        with col_menu_ai:
-            selected_bot_name = st.radio("เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", options=ai_names, horizontal=True)
-        with col_clear_btn:
-            if st.button("♻️ ล้างประวัติแชตทั้งหมด", use_container_width=True, help="คลิกเพื่อรีเซ็ตข้อมูลกรณีระบบค้างหรือข้อความเก่าปนกัน"):
-                st.session_state.chat_history = []
-                st.rerun()
-                
-        active_bot = next((b for b in ai_bots if b["username"] == selected_bot_name), None)
-        
-        if active_bot:
-            st.info(f"{active_bot['avatar']} **{active_bot['username']}**: {active_bot['desc']}")
-            st.divider()
+        if not ai_names:
+            st.warning("⚠️ ไม่พบข้อมูลรายชื่อ AI Bot ในระบบ กรุณาเพิ่มข้อมูลระบบ USER ก่อนครับ")
+        else:
+            # ส่วนควบคุมด้านบน: เลือก AI และ ปุ่มล้างประวัติ
+            col_menu_ai, col_clear_btn = st.columns([4, 1.2])
+            with col_menu_ai:
+                selected_bot_name = st.radio("เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", options=ai_names, horizontal=True)
+            with col_clear_btn:
+                if st.button("♻️ ล้างประวัติแชตทั้งหมด", use_container_width=True):
+                    st.session_state.chat_history = []
+                    st.rerun()
+                    
+            # ค้นหาบอทที่เลือก
+            active_bot = next((b for b in ai_bots if b["username"] == selected_bot_name), ai_bots[0])
             
-            # 🛠️ จุดแก้ไขที่ 1: กรองข้อความให้แสดงเฉพาะ Manager ที่เจาะจงคุยกับบอทตัวนี้ และตัวบอทนี้ตอบกลับเท่านั้น
-            filtered_history = [
-                m for m in st.session_state.chat_history 
-                if (m.get("speaker") == "Manager" and m.get("to_bot") == selected_bot_name) 
-                or m.get("speaker") == selected_bot_name
-            ]
-            
-            # วนลูปแสดงข้อความแชตและรูปภาพที่กรองแล้ว
-            for m in filtered_history:
-                chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
-                with st.chat_message(chat_role): 
-                    st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
-                    if m.get("img"):
-                        st.image(m["img"], width=250)
-            
-            # ปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต
-            chat_img = st.file_uploader("📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", type=["png","jpg","jpeg"], key=f"img_up_{selected_bot_name}")
-            
-            # ช่องพิมพ์ข้อความแชต
-            user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {selected_bot_name} ที่นี่...")
-            
-            if user_msg:
-                img_data = convert_image_to_base64(chat_img) if chat_img else None
+            if active_bot:
+                st.info(f"{active_bot.get('avatar', '🤖')} **{active_bot['username']}**: {active_bot.get('desc', '')}")
+                st.divider()
                 
-                # 🛠️ จุดแก้ไขที่ 2: ระบุคีย์ 'to_bot' เพื่อล็อกเป้าหมายว่า Manager คุยกับบอทตัวไหนอยู่
-                st.session_state.chat_history.append({
-                    "role": "user", 
-                    "speaker": "Manager", 
-                    "to_bot": selected_bot_name, 
-                    "text": user_msg,
-                    "img": img_data
-                })
+                # กรองข้อความให้แสดงเฉพาะที่คุยกันตรงสาย
+                filtered_history = [
+                    m for m in st.session_state.chat_history 
+                    if (m.get("speaker") == "Manager" and m.get("to_bot") == active_bot["username"]) 
+                    or m.get("speaker") == active_bot["username"]
+                ]
                 
-                # กำหนด Prompt สำหรับ AI ปัจจุบัน
-                base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
-                system_prompt = f"{base} จงสวมบทบาทเป็น {active_bot['username']} และเน้นตอบในส่วนงาน: {active_bot['desc']}"
+                # วนลูปแสดงข้อความแชต
+                for m in filtered_history:
+                    chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
+                    with st.chat_message(chat_role): 
+                        st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
+                        if m.get("img"):
+                            st.image(m["img"], width=250)
                 
-                # เรียก API เฉพาะบอทที่เลือกคุย
-                with st.spinner(f"🔮 {selected_bot_name} กำลังวิเคราะห์แผนงาน..."):
-                    ai_reply = call_gemini(user_msg, system_prompt)
-                    st.session_state.chat_history.append({"role": "assistant", "speaker": selected_bot_name, "text": ai_reply})
+                # ปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต
+                chat_img = st.file_uploader("📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", type=["png","jpg","jpeg"], key=f"img_up_{active_bot['username']}")
                 
-                # บันทึกลงระบบงานซ่อมหลัก
-                st.session_state.tasks.append({
-                    "id": len(st.session_state.tasks) + 1, 
-                    "target": f"🎯 แผนงานจาก {selected_bot_name}", 
-                    "detail": f"ปรึกษารายบุคคล: {user_msg}", 
-                    "user": "AI_Automation", 
-                    "status": "กำลังทำ", 
-                    "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
-                    "notes": "", 
-                    "timeline": []
-                })
-                st.rerun()
+                # ช่องพิมพ์ข้อความแชต
+                user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {active_bot['username']} ที่นี่...")
+                
+                if user_msg:
+                    img_data = convert_image_to_base64(chat_img) if chat_img else None
+                    
+                    # บันทึกคำสั่งฝั่งผู้ใช้ล็อกเป้าหมายไปหาบอทตัวนี้
+                    st.session_state.chat_history.append({
+                        "role": "user", 
+                        "speaker": "Manager", 
+                        "to_bot": active_bot["username"], 
+                        "text": user_msg,
+                        "img": img_data
+                    })
+                    
+                    # กำหนด Prompt สำหรับ AI ปัจจุบัน
+                    base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
+                    system_prompt = f"{base} จงสวมบทบาทเป็น {active_bot['username']} และเน้นตอบในส่วนงาน: {active_bot.get('desc', '')}"
+                    
+                    # เรียก API
+                    with st.spinner(f"🔮 {active_bot['username']} กำลังวิเคราะห์แผนงาน..."):
+                        ai_reply = call_gemini(user_msg, system_prompt)
+                        st.session_state.chat_history.append({"role": "assistant", "speaker": active_bot["username"], "text": ai_reply})
+                    
+                    # บันทึกลงระบบงานซ่อมหลัก
+                    st.session_state.tasks.append({
+                        "id": len(st.session_state.tasks) + 1, 
+                        "target": f"🎯 แंधनงานจาก {active_bot['username']}", 
+                        "detail": f"ปรึกษารายบุคคล: {user_msg}", 
+                        "user": "AI_Automation", 
+                        "status": "กำลังทำ", 
+                        "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                        "notes": "", 
+                        "timeline": []
+                    })
+                    st.rerun()
