@@ -1,8 +1,23 @@
 import streamlit as st
 import datetime, requests, json
 
-st.set_page_config(layout="wide", page_title="Tripple Nine Garage", page_icon="⚙️")
-st.markdown("<style>#MainMenu, footer, header {visibility: hidden;}</style>", unsafe_allow_html=True)
+st.set_page_config(
+    layout="wide", 
+    page_title="Tripple Nine Garage", 
+    page_icon="⚙️",
+    initial_sidebar_state="expanded"
+)
+
+st.markdown(
+    """
+    <style>
+    #MainMenu, footer, header {visibility: hidden;}
+    [data-testid="collapsedControl"] {display: none !important;}
+    </style>
+    """, 
+    unsafe_allow_html=True
+)
+
 
 # ปรับปรุงฟังก์ชันตัดปัญหาเรื่องการแปลงค่าคีย์ตัวพิมพ์ใหญ่และอักขระพิเศษ
 def call_gemini(prompt_text, system_instruction):
