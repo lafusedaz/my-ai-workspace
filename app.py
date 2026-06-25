@@ -1,3 +1,5 @@
+from streamlit_cookies_controller import CookieController
+controller = CookieController()
 import streamlit as st
 import datetime
 import requests
@@ -83,14 +85,28 @@ if "inventory" not in st.session_state:
     ]
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 
+cookie_user = controller.get("saved_username")
+cookie_role = controller.get("saved_role")
+
+if cookie_user and cookie_role and "user_role" not in st.session_state:
+    st.session_state.user_role = cookie_role
+    st.session_state.username = cookie_user
+
 if "user_role" not in st.session_state:
     st.title("⚙️ Tripple Nine Garage System")
     un = st.text_input("Username:")
     pw = st.text_input("Password:", type="password")
     if st.button("เข้าสู่ระบบ", use_container_width=True):
         user = next((u for u in st.session_state.users_db if u["username"] == un and u["password"] == pw), None)
-        if user: st.session_state.user_role, st.session_state.username = user["role"], user["username"]; st.rerun()
+        if user: 
+            st.session_state.user_role, st.session_state.username = user["role"], user["username"]
+            expire_time = datetime.datetime.now() + datetime.timedelta(seconds=300)
+            controller.set("saved_username", user["username"], expires=expire_time)
+            controller.set("saved_role", user["role"], expires=expire_time)
+            st.rerun()
         else: st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
+    st.stop()
+
 else:
     role, current_user = st.session_state.user_role, st.session_state.username
     my_user_data = next((u for u in st.session_state.users_db if u["username"] == current_user), None)
@@ -98,7 +114,13 @@ else:
     col_hl, col_hr = st.columns(2)
     with col_hl: st.markdown(f"🏁 **Tripple Nine Garage** | ผู้ใช้งาน: `{current_user}` ({role})")
     with col_hr:
-        if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True): del st.session_state.user_role, st.session_state.username; st.rerun()
+        if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True):     if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True): 
+        del st.session_state.user_role
+        del st.session_state.username
+        controller.remove("saved_username")
+        controller.remove("saved_role")
+        st.rerun()
+
     st.divider()
 
     st.sidebar.subheader("👤 ข้อมูลส่วนตัว")
