@@ -11,7 +11,8 @@ def call_gemini(prompt_text, system_instruction):
     
     # ส่ง API Key ผ่าน Header ปลอดภัยที่สุด ตัดปัญหาลิงก์ชนกัน 100%   
     base_url = "https://googleapis.com"
-    endpoint = f"/v1beta/models/gemini-1.5-flash:generateContent?key={str(api_key).strip()}"
+    endpoint = f"/v1beta/models/gemini-pro:generateContent?key={str(api_key).strip()}"
+
     url = base_url + endpoint
     
     headers = {'Content-Type': 'application/json'}
