@@ -20,7 +20,6 @@ def call_gemini(prompt_text, system_instruction):
         "systemInstruction": {"parts": [{"text": system_instruction}]}
     }
 
-    }
     try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         return res.json()['candidates']['content']['parts']['text'] if res.status_code == 200 else f"❌ API Error: {res.text}"
