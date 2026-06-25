@@ -169,25 +169,21 @@ else:
                 inf.markdown(f"### {item['name']}\n**SKU:** `{item['id']}` | **OEM:** `{item['oem']}`\n💰 {item['price']:,} บาท | 📦 สต๊อค: {item['stock']} ชิ้น")
                 if role == "Manager" and act.button("❌ ลบพาร์ท", key=f"del_{item['id']}", use_container_width=True):
                     st.session_state.inventory = [i for i in st.session_state.inventory if i["id"] != item["id"]]; st.rerun()
-
-      # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager) ---
-    elif menu == "💬 แชตกลุ่ม 5 ที่ปรึกษา AI" and role == "Manager":
-        st.subheader("💬 ห้องประชุมปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
+                    
+        # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager - เวอร์ชันแก้ไขบั๊กข้อความซ้ำ) ---
+    elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
+        st.subheader("💬 ห้องปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
         
         # ดึงรายชื่อ AI Bot ทั้งหมด
         ai_bots = [u for u in st.session_state.users_db if u["role"] == "AI Bot"]
         ai_names = [bot["username"] for bot in ai_bots]
         
-        # แยกแถบเครื่องมือ: ฝั่งซ้ายเลือก AI ฝั่งขวาปุ่มล้างประวัติแชตป้องกันระบบค้าง
+        # ส่วนควบคุมด้านบน: เลือก AI และ ปุ่มล้างประวัติ
         col_menu_ai, col_clear_btn = st.columns([4, 1.2])
         with col_menu_ai:
-            selected_bot_name = st.radio(
-                "เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", 
-                options=ai_names, 
-                horizontal=True
-            )
+            selected_bot_name = st.radio("เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", options=ai_names, horizontal=True)
         with col_clear_btn:
-            if st.button("♻️ ล้างประวัติแชตทั้งหมด", use_container_width=True, help="คลิกเพื่อรีเซ็ตข้อมูลกรณีช่องแชตไม่แสดงผล"):
+            if st.button("♻️ ล้างประวัติแชตทั้งหมด", use_container_width=True, help="คลิกเพื่อรีเซ็ตข้อมูลกรณีระบบค้างหรือข้อความเก่าปนกัน"):
                 st.session_state.chat_history = []
                 st.rerun()
                 
@@ -197,32 +193,38 @@ else:
             st.info(f"{active_bot['avatar']} **{active_bot['username']}**: {active_bot['desc']}")
             st.divider()
             
-            # ดึงประวัติเฉพาะที่คุยกับ AI ตัวที่เลือก หรือข้อความที่ระบุคู่สนทนาถูกต้อง
+            # 🛠️ จุดแก้ไขที่ 1: กรองข้อความให้แสดงเฉพาะ Manager ที่เจาะจงคุยกับบอทตัวนี้ และตัวบอทนี้ตอบกลับเท่านั้น
             filtered_history = [
                 m for m in st.session_state.chat_history 
-                if m.get("speaker") == "Manager" or m.get("speaker") == selected_bot_name
+                if (m.get("speaker") == "Manager" and m.get("to_bot") == selected_bot_name) 
+                or m.get("speaker") == selected_bot_name
             ]
             
-            # วนลูปแสดงข้อความแชต
-                        # วนลูปแสดงข้อความแชต (แทรกคำสั่งแสดงรูปภาพย้อนหลัง)
+            # วนลูปแสดงข้อความแชตและรูปภาพที่กรองแล้ว
             for m in filtered_history:
                 chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
                 with st.chat_message(chat_role): 
                     st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
-                    # ➕ จุดแทรกที่ 1.1: ถ้าข้อความนั้นมีรูปภาพแนบมาด้วย ให้แสดงรูปภาพในกล่องแชต
                     if m.get("img"):
                         st.image(m["img"], width=250)
             
-            # ➕ จุดแทรกที่ 1.2: เพิ่มปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต (จะเปลี่ยนสลับไปตาม AI แต่ละตัว)
+            # ปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต
             chat_img = st.file_uploader("📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", type=["png","jpg","jpeg"], key=f"img_up_{selected_bot_name}")
             
-            # ช่องพิมพ์ข้อความแชตเดิมของคุณ
+            # ช่องพิมพ์ข้อความแชต
             user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {selected_bot_name} ที่นี่...")
-
             
             if user_msg:
-                # บันทึกคำถามของ Manager
-                st.session_state.chat_history.append({"role": "user", "speaker": "Manager", "text": user_msg})
+                img_data = convert_image_to_base64(chat_img) if chat_img else None
+                
+                # 🛠️ จุดแก้ไขที่ 2: ระบุคีย์ 'to_bot' เพื่อล็อกเป้าหมายว่า Manager คุยกับบอทตัวไหนอยู่
+                st.session_state.chat_history.append({
+                    "role": "user", 
+                    "speaker": "Manager", 
+                    "to_bot": selected_bot_name, 
+                    "text": user_msg,
+                    "img": img_data
+                })
                 
                 # กำหนด Prompt สำหรับ AI ปัจจุบัน
                 base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
@@ -245,4 +247,3 @@ else:
                     "timeline": []
                 })
                 st.rerun()
-
