@@ -266,7 +266,7 @@ elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager
         
         if not ai_names:
             st.warning("⚠️ ไม่พบข้อมูลรายชื่อ AI Bot ในระบบ กรุณาเพิ่มข้อมูลระบบ USER ก่อนครับ")
-    else:
+else:
             # ส่วนควบคุมด้านบน: เลือก AI และ ปุ่มล้างประวัติ
             col_menu_ai, col_clear_btn = st.columns([4, 1.2])
             with col_menu_ai:
