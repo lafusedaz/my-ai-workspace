@@ -114,7 +114,7 @@ else:
                 c1, c2, c3 = st.columns([2.2, 3, 1.5])
                 with c1:
                     u_data = next((usr for usr in st.session_state.users_db if usr["username"] == task["user"]), None)
-                    cav1, cav2 = st.columns()
+                    cav1, cav2 = st.columns(2)
                     if u_data and u_data.get("avatar"): cav1.image(u_data["avatar"], width=45)
                     else: cav1.markdown("### 👤")
                     with cav2:
