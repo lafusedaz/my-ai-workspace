@@ -21,7 +21,7 @@ def call_gemini(prompt_text, system_instruction):
             {"role": "user", "content": f"สวมบทบาท: {system_instruction}\nคำถาม: {prompt_text}"}
         ]
     }
-       try:
+    try:
         res = requests.post(url, headers=headers, data=json.dumps(payload))
         if res.status_code == 200:
             data = res.json()
