@@ -62,6 +62,17 @@ def call_gemini(prompt_text, system_instruction):
         else:
             return f"💡 AI กำลังโหลดข้อมูล กรุณาลองอีกครั้ง (Code {res.status_code})"
     except Exception as e: return f"❌ System Error: {str(e)}"
+    
+    def convert_image_to_base64(uploaded_file):
+        if uploaded_file is not None:
+            try:
+                import base64
+                bytes_data = uploaded_file.getvalue()
+                base64_str = base64.b64encode(bytes_data).decode("utf-8")
+                return f"data:image/jpeg;base64,{base64_str}"
+            except Exception:
+                return None
+        return None
 
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
