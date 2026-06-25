@@ -257,7 +257,7 @@ elif menu in ["📦 สินค้าหลังร้าน", "📦 จัด
                     
 
        # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager - เวอร์ชันแก้ปัญหาหน้าจอว่าง) ---
-    elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
+elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
         st.subheader("💬 ห้องประชุมปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
         
         # ดึงรายชื่อ AI Bot ทั้งหมด
@@ -266,7 +266,7 @@ elif menu in ["📦 สินค้าหลังร้าน", "📦 จัด
         
         if not ai_names:
             st.warning("⚠️ ไม่พบข้อมูลรายชื่อ AI Bot ในระบบ กรุณาเพิ่มข้อมูลระบบ USER ก่อนครับ")
-        else:
+    else:
             # ส่วนควบคุมด้านบน: เลือก AI และ ปุ่มล้างประวัติ
             col_menu_ai, col_clear_btn = st.columns([4, 1.2])
             with col_menu_ai:
