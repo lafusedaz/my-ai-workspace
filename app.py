@@ -109,18 +109,18 @@ if "user_role" not in st.session_state:
             controller.set("saved_role", user["role"], expires=expire_time)
             st.success("🔓 ยินดีต้อนรับเข้าสู่ระบบ!")
             st.rerun()
-        else: 
+    
             st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
             
     # คำสั่งย้ายมาอยู่แนวเดียวกับ st.title เพื่อล็อกหน้าจอให้ถูกต้องเด็ดขาด
     st.stop()
 
-    role, current_user = st.session_state.user_role, st.session_state.username
-    my_user_data = next((u for u in st.session_state.users_db if u["username"] == current_user), None)
+role, current_user = st.session_state.user_role, st.session_state.username
+my_user_data = next((u for u in st.session_state.users_db if u["username"] == current_user), None)
     
-    col_hl, col_hr = st.columns(2)
-    with col_hl: st.markdown(f"🏁 **Tripple Nine Garage** | ผู้ใช้งาน: `{current_user}` ({role})")
-    with col_hr:
+col_hl, col_hr = st.columns(2)
+with col_hl: st.markdown(f"🏁 **Tripple Nine Garage** | ผู้ใช้งาน: `{current_user}` ({role})")
+with col_hr:
         if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True):
             del st.session_state.user_role
             del st.session_state.username
