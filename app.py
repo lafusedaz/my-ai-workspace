@@ -214,38 +214,44 @@ else:
                     st.session_state.chat_history = []
                     st.rerun()
                     
-            # ค้นหาบอทที่เลือก
+                     # ค้นหาบอทที่เลือกอย่างปลอดภัย
             active_bot = next((b for b in ai_bots if b["username"] == selected_bot_name), ai_bots[0])
             
             if active_bot:
                 st.info(f"{active_bot.get('avatar', '🤖')} **{active_bot['username']}**: {active_bot.get('desc', '')}")
                 st.divider()
                 
-                # กรองข้อความให้แสดงเฉพาะที่คุยกันตรงสาย
+                # กรองข้อความให้แสดงเฉพาะที่คุยกันตรงสายงานของบอทแต่ละตัว
                 filtered_history = [
                     m for m in st.session_state.chat_history 
                     if (m.get("speaker") == "Manager" and m.get("to_bot") == active_bot["username"]) 
                     or m.get("speaker") == active_bot["username"]
                 ]
                 
-                # วนลูปแสดงข้อความแชต
+                # วนลูปแสดงข้อความแชตทั้งหมดในอดีต
                 for m in filtered_history:
                     chat_role = "user" if m.get("speaker") == "Manager" else "assistant"
-                    with st.chat_message(chat_role): 
+                    with st.chat_message(chat_role, avatar=active_bot["avatar"] if chat_role == "assistant" else None): 
                         st.write(f"**{m.get('speaker', 'Unknown')}:** {m.get('text', '')}")
                         if m.get("img"):
                             st.image(m["img"], width=250)
                 
-                # ปุ่มอัปโหลดไฟล์ภาพไว้เหนือช่องแชต
-                chat_img = st.file_uploader("📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", type=["png","jpg","jpeg"], key=f"img_up_{active_bot['username']}")
+                # ใช้จำนวนประวัติแชตมาเปลี่ยนคีย์ เพื่อบังคับล้างรูปภาพในกล่อง file_uploader หลังกดส่งข้อความสำเร็จ
+                chat_history_len = len(st.session_state.chat_history)
+                chat_img = st.file_uploader(
+                    "📸 แนบรูปภาพชิ้นส่วน/หน้างานซ่อม (ถ้ามี):", 
+                    type=["png","jpg","jpeg"], 
+                    key=f"img_up_{active_bot['username']}_{chat_history_len}"
+                )
                 
-                # ช่องพิมพ์ข้อความแชต
+                # ช่องพิมพ์ข้อความแชตด้านล่างสุด
                 user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {active_bot['username']} ที่นี่...")
                 
                 if user_msg:
+                    # แปลงภาพถ่ายหน้างานเป็น Base64 ป้องกันภาพหายหลังการรีรันหน้าจอ
                     img_data = convert_image_to_base64(chat_img) if chat_img else None
                     
-                    # บันทึกคำสั่งฝั่งผู้ใช้ล็อกเป้าหมายไปหาบอทตัวนี้
+                    # 1. บันทึกคำสั่งฝั่งผู้ใช้ล็อกเป้าหมายไปหาบอทตัวปัจจุบัน
                     st.session_state.chat_history.append({
                         "role": "user", 
                         "speaker": "Manager", 
@@ -254,24 +260,33 @@ else:
                         "img": img_data
                     })
                     
-                    # กำหนด Prompt สำหรับ AI ปัจจุบัน
+                    # 2. ตั้งค่าข้อกำหนดพฤติกรรม (System Prompt) ส่งไปประมวลผลร่วมกัน
                     base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
                     system_prompt = f"{base} จงสวมบทบาทเป็น {active_bot['username']} และเน้นตอบในส่วนงาน: {active_bot.get('desc', '')}"
                     
-                    # เรียก API
+                    # 3. เรียกใช้งานโมเดลผ่าน OpenRouter API (Gemini)
                     with st.spinner(f"🔮 {active_bot['username']} กำลังวิเคราะห์แผนงาน..."):
                         ai_reply = call_gemini(user_msg, system_prompt)
-                        st.session_state.chat_history.append({"role": "assistant", "speaker": active_bot["username"], "text": ai_reply})
+                        st.session_state.chat_history.append({
+                            "role": "assistant", 
+                            "speaker": active_bot["username"], 
+                            "text": ai_reply
+                        })
                     
-                    # บันทึกลงระบบงานซ่อมหลัก
+                    # 4. บันทึกลงระบบตารางงานซ่อมหลักของร้านโดยอัตโนมัติ (AI Automation)
+                    # หาค่า ID ล่าสุดอย่างปลอดภัยเพื่อป้องกัน ID ซ้ำซ้อน
+                    new_task_id = max([t["id"] for t in st.session_state.tasks]) + 1 if st.session_state.tasks else 1
+                    
                     st.session_state.tasks.append({
-                        "id": len(st.session_state.tasks) + 1, 
-                        "target": f"🎯 แंधनงานจาก {active_bot['username']}", 
-                        "detail": f"ปรึกษารายบุคคล: {user_msg}", 
+                        "id": new_task_id, 
+                        "target": f"🎯 แผนงานจาก {active_bot['username']}", # แก้ไขคำสะกดเพี้ยน
+                        "detail": f"บันทึกคำปรึกษา: {user_msg}\n\n🤖 สรุปคำแนะนำ: {ai_reply}", # นำคำตอบของ AI มาบันทึกเก็บลงตารางงานช่างด้วย
                         "user": "AI_Automation", 
                         "status": "กำลังทำ", 
                         "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
                         "notes": "", 
                         "timeline": []
                     })
+                    
+                    # รีรันระบบเพื่อเคลียร์ช่องใส่รูปภาพและแสดงผลแชตข้อความล่าสุดทันที
                     st.rerun()
