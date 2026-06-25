@@ -37,7 +37,7 @@ if "user_role" not in st.session_state:
         else: st.error("❌ บัญชีหรือรหัสผ่านไม่ถูกต้อง")
 else:
     role, current_user = st.session_state.user_role, st.session_state.username
-    col_hl, col_hr = st.columns()
+    col_hl, col_hr = st.columns(2)
     with col_hl: st.markdown(f"🏁 **Tripple Nine Garage** | ผู้ใช้งาน: `{current_user}` ({role})")
     with col_hr:
         if st.button("ออกจากระบบ 🏃‍♂️", use_container_width=True): del st.session_state.user_role, st.session_state.username; st.rerun()
