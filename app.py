@@ -156,9 +156,9 @@ else:
         q = st.text_input("🔍 ค้นหาตามชื่อสินค้าบางส่วน หรือ รหัสสินค้า:")
         inv = [i for i in st.session_state.inventory if q.lower() in i["name"].lower() or q.lower() in i["id"].lower()] if q else st.session_state.inventory
         if role == "Manager":
-            with st.expander("➕ เพิ่มบอดี้พาร์ทใหม่เข้าสต๊оค"):
+            with st.expander("➕ เพิ่มบอดี้พาร์ทใหม่เข้าสต๊อค"):
                 p_id, p_name, p_oem = st.text_input("รหัสสินค้า:"), st.text_input("ชื่อสินค้า:"), st.text_input("รหัส OEM:")
-                p_p, p_s = st.number_input("ราคาปลีก:", min_value=0), st.number_input("สต๊оค:", min_value=0)
+                p_p, p_s = st.number_input("ราคาปลีก:", min_value=0), st.number_input("สต๊อค:", min_value=0)
                 p_img = st.file_uploader("แนบรูปภาพสินค้า:", type=["png","jpg","jpeg"])
                 if st.button("บันทึกสินค้า") and p_id and p_name:
                     st.session_state.inventory.append({"id": p_id, "name": p_name, "oem": p_oem, "price": p_p, "stock": p_s, "img": p_img if p_img else "https://placeholder.com"}); st.rerun()
@@ -170,16 +170,68 @@ else:
                 if role == "Manager" and act.button("❌ ลบพาร์ท", key=f"del_{item['id']}", use_container_width=True):
                     st.session_state.inventory = [i for i in st.session_state.inventory if i["id"] != item["id"]]; st.rerun()
 
-    elif menu == "💬 แชตกลุ่ม 5 ที่ปรึกษา AI" and role == "Manager":
-        st.subheader("💬 ห้องประชุมบอร์ดบริหาร AI จริง (Real-time)")
-        for m in st.session_state.chat_history:
-            with st.chat_message(m["role"]): st.write(f"**{m['speaker']}:** {m['text']}")
-        user_msg = st.chat_input("พิมพ์หัวข้อปรึกษาเชิงลึกที่นี่...")
-        if user_msg:
-            st.session_state.chat_history.append({"role": "user", "speaker": "Manager", "text": user_msg})
-            base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
-            ai_bots = [u for u in st.session_state.users_db if u["role"] == "AI Bot"]
-            for bot in ai_bots:
-                st.session_state.chat_history.append({"role": "assistant", "speaker": bot["username"], "text": call_gemini(user_msg, f"{base} จงสวมบทบาทเป็น {bot['username']} และเน้น {bot['desc']}")})
-            st.session_state.tasks.append({"id": len(st.session_state.tasks)+1, "target": "🎯 แผนงานจากระบบ AI", "detail": f"ระดมสมอง: {user_msg}", "user": "AI_Automation", "status": "กำลังทำ", "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "notes": "", "timeline": []})
-            st.rerun()
+       # --- เมนู 4: ห้องแชตแยกที่ปรึกษา AI (เฉพาะ Manager) ---
+    elif menu == "💬 แชตที่ปรึกษา AI" and role == "Manager":
+        st.subheader("💬 ห้องปรึกษาผู้เชี่ยวชาญ AI (แยกคุยรายบุคคล)")
+        
+        # ดึงรายชื่อ AI Bot ทั้งหมดที่มีในระบบปัจจุบัน
+        ai_bots = [u for u in st.session_state.users_db if u["role"] == "AI Bot"]
+        ai_names = [bot["username"] for bot in ai_bots]
+        
+        # สร้างแถบด้านบนหรือขวาด้านในหน้าแชต เพื่อให้เลือกผู้เชี่ยวชาญ (ในที่นี้ใช้สไตล์ Pills สวยงามและเลือกง่าย)
+        selected_bot_name = st.radio(
+            "เลือกผู้เชี่ยวชาญที่คุณต้องการปรึกษา:", 
+            options=ai_names, 
+            horizontal=True,
+            help="คลิกเลือกเปลี่ยนตัวละคร AI เพื่อดูประวัติการคุยและส่งคำถามแยกกันได้ทันที"
+        )
+        
+        # ค้นหา Object ของบอทตัวที่ถูกเลือกเพื่อดึงรายละเอียดคำอธิบาย (desc) และสัญลักษณ์ (avatar)
+        active_bot = next((b for b in ai_bots if b["username"] == selected_bot_name), None)
+        
+        if active_bot:
+            st.info(f"{active_bot['avatar']} **{active_bot['username']}**: {active_bot['desc']}")
+            st.divider()
+            
+            # กรองประวัติการแชต: แสดงเฉพาะข้อความของผู้ใช้ (Manager) และ AI Bot ตัวที่กำลังเลือกอยู่เท่านั้น
+            filtered_history = [
+                m for m in st.session_state.chat_history 
+                if m["speaker"] == "Manager" or m["speaker"] == selected_bot_name
+            ]
+            
+            # แสดงประวัติการแชตที่กรองแล้ว
+            for m in filtered_history:
+                # ตรวจสอบบทบาทเพื่อเลือกฝั่งการแสดงผลไอคอนข้อความ
+                chat_role = "user" if m["speaker"] == "Manager" else "assistant"
+                with st.chat_message(chat_role): 
+                    st.write(f"**{m['speaker']}:** {m['text']}")
+                    
+            # ช่องรับข้อความพิมพ์คุยกับ AI ปัจจุบัน
+            user_msg = st.chat_input(f"พิมพ์ข้อความปรึกษาเชิงลึกกับ {selected_bot_name} ที่นี่...")
+            
+            if user_msg:
+                # 1. บันทึกคำถามของ Manager ลงประวัติหลัก
+                st.session_state.chat_history.append({"role": "user", "speaker": "Manager", "text": user_msg})
+                
+                # กำหนดคำสั่งควบคุมระบบ (System Instruction)
+                base = "คุณคือที่ปรึกษาของอู่ Tripple Nine Garage ร้านแต่งรถคัสตอมแปลงโฉม Sylphy->Sentra, Teana->Altima และรถยุโรป Benz/BMW/Porsche ทำสีพรีเมียม 2K ตอบยาวไม่เกิน 2 ประโยค"
+                system_prompt = f"{base} จงสวมบทบาทเป็น {active_bot['username']} และเน้นตอบในส่วนงาน: {active_bot['desc']}"
+                
+                # 2. เรียกใช้งาน API เจมินี่เพียงตัวเดียวที่เลือกคุย (หน้าเว็บจะตอบสนองไวขึ้น 3 เท่าตัว!)
+                with st.spinner(f"🔮 {selected_bot_name} กำลังวิเคราะห์ข้อมูลซ่อมและวางแผน..."):
+                    ai_reply = call_gemini(user_msg, system_prompt)
+                    # บันทึกคำตอบกลับของบอทลงประวัติหลัก
+                    st.session_state.chat_history.append({"role": "assistant", "speaker": selected_bot_name, "text": ai_reply})
+                
+                # 3. บันทึกประวัติแผนงานอัตโนมัติลงในกระดาน Tasks
+                st.session_state.tasks.append({
+                    "id": len(st.session_state.tasks) + 1, 
+                    "target": f"🎯 แผนงานจาก {selected_bot_name}", 
+                    "detail": f"ปรึกษารายบุคคล: {user_msg}", 
+                    "user": "AI_Automation", 
+                    "status": "กำลังทำ", 
+                    "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                    "notes": "", 
+                    "timeline": []
+                })
+                st.rerun()
