@@ -140,7 +140,7 @@ else:
 if "avatar_version" not in st.session_state:
         st.session_state.avatar_version = 0
         
-    uploaded_avatar = st.sidebar.file_uploader(
+uploaded_avatar = st.sidebar.file_uploader(
         "เปลี่ยนรูป Avatar ของคุณ:", 
         type=["png","jpg","jpeg"], 
         key=f"my_av_up_{st.session_state.avatar_version}"
