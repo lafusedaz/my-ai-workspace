@@ -147,7 +147,7 @@ uploaded_avatar = st.sidebar.file_uploader(
     )
     
     # ใช้ปุ่มกดยืนยันเพื่อล็อกไม่ให้เกิดลูป Rerun ค้าง และแปลงไฟล์รูปภาพ
-    if uploaded_avatar and my_user_data:
+if uploaded_avatar and my_user_data:
         if st.sidebar.button("💾 ยืนยันเปลี่ยนรูปโปรไฟล์", use_container_width=True, type="primary"):
             img_base64 = convert_image_to_base64(uploaded_avatar)
             if img_base64:
